@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria de danmaxbot</title>
+  <style>
+    :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; --muted: #94a3b8; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; margin: 0; padding: 2rem; }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { border-bottom: 1px solid #334155; padding-bottom: 0.5rem; margin-top: 2rem; }
+    p { margin-bottom: 1rem; color: var(--muted); }
+    ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.5rem; }
+    .badge { background: #1e293b; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; }
+    footer { margin-top: 3rem; font-size: 0.875rem; color: #64748b; }
+    @media (max-width: 600px) { body { padding: 1rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🥷 Memoria de danmaxbot</h1>
+    <p>Información almacenada en OpenClaw – <span id="fecha"></span></p>
+  </header>
+
+  <section>
+    <h2>👤 Sobre Mauro</h2>
+    <ul>
+      <li><strong>Nombre:</strong> Mauro</li>
+      <li><strong>Pronombres:</strong> él/le</li>
+      <li><strong>Zona horaria:</strong> UTC-3 (Santiago de Chile)</li>
+      <li><strong>Ubicación:</strong> Chile</li>
+      <li><strong>Familia:</strong> Dante (9 años, TEA no verbal, memoria fotográfica, amante de dinosaurios) y Máximo (8 años, curioso, futuro paleontólogo infantil)</li>
+      <li><strong>Preferencias de interacción:</strong> Respuestas amigables con toque irónico y audaz (estilo Jarvis).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📖 Proyectos</h2>
+    <h3>El Viaje en el Tiempo de los Lara</h3>
+    <p>Libro en expansión: Prólogo + 8 capítulos (~35 000 palabras). Objetivo ~100 páginas. Estado: completo.</p>
+    <h3>Kali Linux</h3>
+    <p>Planificado instalar via Docker para auditorías de seguridad (herramientas: nmap, metasploit, sqlmap, john, wireshark).</p>
+  </section>
+
+  <section>
+    <h2>🔧 Integraciones y Skills</h2>
+    <ul>
+      <li>Telegram (canal principal).</li>
+      <li>Edge TTS (Azure Speech, voz es-CL-CatalinaNeural).</li>
+      <li>Brave Search API (clave configurada, monitoreo automático).</li>
+      <li>MCP: Zapier Google Drive y Gmail.</li>
+      <li>Ollama embeddings (nomic-embed-text, 0.5 GB) – búsqueda semántica local.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>⚙️ Configuraciones clave</h2>
+    <ul>
+      <li>OpenClaw: 2026.3.2</li>
+      <li>Modelo LLM: openrouter/stepfun/step-3.5-flash:free</li>
+      <li>Image model: nvidia/nemotron-nano-12b-v2-vl</li>
+      <li>Memory search: provider=ollama, model=nomic-embed-text, scoreThreshold=0.3</li>
+      <li>TTS: auto=always, provider=edge, voice=es-CL-CatalinaNeural</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📁 Estructura de memoria</h2>
+    <p>Archivos principales:</p>
+    <ul>
+      <li><code>MEMORY.md</code> –Memoria a largo plazo.</li>
+      <li><code>memory/YYYY-MM-DD.md</code> – Diarios de sesión.</li>
+      <li><code>INVENTARIO_INTEGRACIONES.md</code> – Inventario de integraciones.</li>
+      <li><code>CAPACIDADES_SISTEMA.md</code> – Capacidades documentadas.</li>
+      <li><code>backups/</code> – Backups automáticos diarios.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>⏰ Monitores activos (HEARTBEAT)</h2>
+    <ul>
+      <li>APOD NASA – Cada 2 horas si hay nueva fecha.</li>
+      <li>Sismos Chile – Cada 5 minutos (magnitud ≥ 4.4).</li>
+      <li>Brave Search API usage – Cada 2 horas, solo si hay uso.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Página generada automáticamente por danmaxbot el <span id="now"></span>.</p>
+    <p>OpenClaw 2026.3.2 en Oracle VPS ARM (23 GB RAM, 193 GB disco).</p>
+  </footer>
+
+  <script>
+    document.getElementById('fecha').textContent = new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('now').textContent = new Date().toISOString().replace('T', ' ').substring(0,19) + ' UTC';
+  </script>
+</body>
+</html>
