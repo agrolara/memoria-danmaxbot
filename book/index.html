@@ -25,11 +25,11 @@
     </header>
 
     <section id="content">
-      <!-- Contenido del libro inyectado vía fetch -->
+      Cargando libro...
     </section>
 
     <footer style="margin-top: 4rem; color: var(--muted); font-size: 0.9rem;">
-      <p>Generado por danmaxbot – <a href="https://github.com/agrolara/memoria-danmaxbot/blob/main/book/content.html">Ver código fuente</a></p>
+      <p>Generado por danmaxbot – <a href="https://github.com/agrolara/memoria-danmaxbot/blob/main/book/content.md">Ver código fuente</a></p>
     </footer>
   </div>
 
@@ -40,6 +40,9 @@
   </div>
   <div id="progress"></div>
 
+  <!-- marked.js desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <script>
     // Estado TTS
     const synth = window.speechSynthesis;
@@ -47,12 +50,13 @@
     let currentIdx = 0;
     let isPaused = false;
 
-    // Cargar contenido del libro
-    fetch('content.html')
+    // Cargar contenido markdown y renderizar
+    fetch('content.md')
       .then(r => r.text())
-      .then(html => {
+      .then(md => {
+        const html = marked.parse(md);
         document.getElementById('content').innerHTML = html;
-        // Preparar párrafos para TTS
+        // Preparar párrafos para TTS (dividir por líneas vacías)
         const text = document.getElementById('content').innerText;
         paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
         console.log('Párrafos cargados:', paragraphs.length);
