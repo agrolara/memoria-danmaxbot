@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Viaje en el Tiempo de los Lara</title>
+  <style>
+    :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; --muted: #94a3b8; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; margin: 0; padding: 2rem; }
+    h1, h2, h3 { color: var(--accent); margin-top: 2rem; }
+    a { color: var(--accent); }
+    .container { max-width: 800px; margin: 0 auto; }
+    .controls { position: fixed; bottom: 1rem; right: 1rem; display: flex; gap: 0.5rem; }
+    button { background: var(--accent); color: var(--bg); border: none; padding: 0.75rem 1rem; border-radius: 0.25rem; font-weight: bold; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); width: 0%; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📖 El Viaje en el Tiempo de los Lara</h1>
+      <p>Libro completo – Expansión v1 (2026)</p>
+      <p><em>Una historia de ciencia ficción chilena con base científica.</em></p>
+    </header>
+
+    <section id="content">
+      <!-- Contenido del libro inyectado vía fetch -->
+    </section>
+
+    <footer style="margin-top: 4rem; color: var(--muted); font-size: 0.9rem;">
+      <p>Generado por danmaxbot – <a href="https://github.com/agrolara/memoria-danmaxbot/blob/main/book/content.html">Ver código fuente</a></p>
+    </footer>
+  </div>
+
+  <div class="controls">
+    <button id="play">▶️ Leer</button>
+    <button id="pause">⏸️ Pausa</button>
+    <button id="stop">⏹️ Stop</button>
+  </div>
+  <div id="progress"></div>
+
+  <script>
+    // Cargar contenido del libro
+    fetch('content.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('content').innerHTML = html;
+        // Después de cargar, reconstruir tabla de contenido (navegación por capítulos) opcional
+      })
+      .catch(err => {
+        document.getElementById('content').innerHTML = '<p>Error cargando el libro.</p>';
+        console.error(err);
+      });
+
+    // TTS con Web Speech API
+    const synth = window.speechSynthesis;
+    let utterance = null;
+    let isPaused = false;
+
+    document.getElementById('play').addEventListener('click', () => {
+      if (synth.speaking && isPaused) {
+        synth.resume();
+        isPaused = false;
+        return;
+      }
+      if (synth.speaking) return; // ya hablando
+      const text = document.getElementById('content').innerText;
+      utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-CL';
+      utterance.rate = 1.0;
+      utterance.onend = () => { updateProgress(0); };
+      synth.speak(utterance);
+    });
+
+    document.getElementById('pause').addEventListener('click', () => {
+      if (synth.speaking && !isPaused) {
+        synth.pause();
+        isPaused = true;
+      }
+    });
+
+    document.getElementById('stop').addEventListener('click', () => {
+      synth.cancel();
+      isPaused = false;
+      updateProgress(0);
+    });
+
+    // Progress bar (aproximado)
+    function updateProgress(percent) {
+      document.getElementById('progress').style.width = percent + '%';
+    }
+  </script>
+</body>
+</html>
