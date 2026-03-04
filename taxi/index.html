@@ -208,10 +208,10 @@
       if (gameOver) return;
       const dy = e.changedTouches[0].clientY - touchStartY;
       if (Math.abs(dy) > 30) {
-        if (dy < 0 && player.lane < laneCount - 1) {
-          player.lane++; // swipe up -> move down lane (because lane 0 at top)
-        } else if (dy > 0 && player.lane > 0) {
-          player.lane--; // swipe down -> move up lane
+        if (dy < 0 && player.lane > 0) {
+          player.lane--; // swipe up -> move up (lane 0 es el superior)
+        } else if (dy > 0 && player.lane < laneCount - 1) {
+          player.lane++; // swipe down -> move down
         }
       }
       player.y = laneToY(player.lane);
