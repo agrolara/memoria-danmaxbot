@@ -41,22 +41,51 @@
   <div id="progress"></div>
 
   <script>
+    // Estado TTS
+    const synth = window.speechSynthesis;
+    let paragraphs = [];
+    let currentIdx = 0;
+    let isPaused = false;
+
     // Cargar contenido del libro
     fetch('content.html')
       .then(r => r.text())
       .then(html => {
         document.getElementById('content').innerHTML = html;
-        // Después de cargar, reconstruir tabla de contenido (navegación por capítulos) opcional
+        // Preparar párrafos para TTS
+        const text = document.getElementById('content').innerText;
+        paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+        console.log('Párrafos cargados:', paragraphs.length);
       })
       .catch(err => {
         document.getElementById('content').innerHTML = '<p>Error cargando el libro.</p>';
         console.error(err);
       });
 
-    // TTS con Web Speech API
-    const synth = window.speechSynthesis;
-    let utterance = null;
-    let isPaused = false;
+    function speakParagraph() {
+      if (currentIdx >= paragraphs.length) {
+        updateProgress(100);
+        return;
+      }
+      const txt = paragraphs[currentIdx].trim();
+      if (!txt) {
+        currentIdx++;
+        return speakParagraph();
+      }
+      const utter = new SpeechSynthesisUtterance(txt);
+      utter.lang = 'es-CL';
+      utter.rate = 1.0;
+      utter.onend = () => {
+        currentIdx++;
+        const percent = (currentIdx / paragraphs.length) * 100;
+        updateProgress(percent);
+        speakParagraph();
+      };
+      utter.onerror = e => {
+        console.error('TTS error:', e);
+      };
+      synth.speak(utter);
+    }
 
     document.getElementById('play').addEventListener('click', () => {
       if (synth.speaking && isPaused) {
@@ -64,13 +93,12 @@
         isPaused = false;
         return;
       }
-      if (synth.speaking) return; // ya hablando
-      const text = document.getElementById('content').innerText;
-      utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-CL';
-      utterance.rate = 1.0;
-      utterance.onend = () => { updateProgress(0); };
-      synth.speak(utterance);
+      if (synth.speaking) return;
+      if (paragraphs.length === 0) {
+        alert('El libro no está cargado aún.');
+        return;
+      }
+      speakParagraph();
     });
 
     document.getElementById('pause').addEventListener('click', () => {
@@ -83,10 +111,10 @@
     document.getElementById('stop').addEventListener('click', () => {
       synth.cancel();
       isPaused = false;
+      currentIdx = 0;
       updateProgress(0);
     });
 
-    // Progress bar (aproximado)
     function updateProgress(percent) {
       document.getElementById('progress').style.width = percent + '%';
     }
