@@ -8,19 +8,26 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
     h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    #score { margin-bottom: 0.5rem; font-size: 1.2rem; }
-    canvas { background: #1e293b; border: 2px solid #f59e0b; touch-action: none; }
+    #stats { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 1.1rem; }
+    #score { color: #38bdf8; }
+    #level { color: #f59e0b; }
+    canvas { background: #1e293b; border: 2px solid #f59e0b; touch-action: none; max-width: 100%; height: auto; }
     #controls { margin-top: 1rem; display: flex; gap: 1rem; }
     button { background: #f59e0b; color: #0f172a; border: none; padding: 0.75rem 1.5rem; border-radius: 0.25rem; font-weight: bold; cursor: pointer; }
     button:active { background: #d97706; }
     #instructions { font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem; text-align: center; }
+    #powerup-bar { margin-top: 0.5rem; font-size: 0.9rem; color: #4ade80; min-height: 1.2rem; }
   </style>
 </head>
 <body>
   <h1>🚕 Radio Taxi Full Express</h1>
-  <div id="score">Puntos: <span id="pts">0</span></div>
+  <div id="stats">
+    <span id="score">Puntos: <span id="pts">0</span></span>
+    <span id="level">Nivel: <span id="lvl">1</span></span>
+  </div>
+  <div id="powerup-bar"></div>
   <canvas id="game" width="500" height="300"></canvas>
-  <div id="instructions">Usa ↑/↓ o desliza verticalmente para cambiar de pista</div>
+  <div id="instructions">↑/↓ o desliza verticalmente para cambiar pista</div>
   <div id="controls">
     <button id="restart">Reiniciar</button>
   </div>
@@ -28,9 +35,10 @@
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     const ptsSpan = document.getElementById('pts');
+    const lvlSpan = document.getElementById('lvl');
+    const powerupBar = document.getElementById('powerup-bar');
     const restartBtn = document.getElementById('restart');
 
-    // Web Audio API context for sounds
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
 
@@ -38,7 +46,7 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
       osc.connect(gain);
@@ -46,7 +54,19 @@
       osc.start();
       osc.stop(audioCtx.currentTime + 0.1);
     }
-
+    function playPowerup() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
     function playCrash() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const bufferSize = audioCtx.sampleRate * 0.3;
@@ -63,44 +83,54 @@
       source.start();
     }
 
-    // Game constants
     const laneCount = 5;
     const laneHeight = canvas.height / laneCount;
-    const player = {
-      lane: 2,            // 0-4 (center initially)
-      x: canvas.width - 60, // fixed x near right edge
-      y: 0,               // will be computed from lane
-      w: 40,
-      h: 50
-    };
+    const player = { lane: 2, x: canvas.width - 60, y: 0, w: 40, h: 50 };
     player.y = laneToY(player.lane);
 
     let obstacles = [];
+    let powerups = [];
     let score = 0;
+    let level = 1;
     let gameOver = false;
-    let speed = 2.5; // pixels per frame
+    let speed = 2.5;
     let spawnTimer = 0;
-    const spawnInterval = 60; // frames
+    const spawnInterval = 60;
+    let powerupActive = null;
+    let powerupTimer = 0;
+    const powerupDuration = 300;
 
-    // Emojis para obstáculos
-    const obstacleEmojis = ['🚗', '🚓', '🚲', '🛴', '🛵', '🏍️', '🚌', '🚎', '🏎️', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🛢️', '🚧', '🚦', '🗼', '🌵', '🌲', '🌳', '🌴', '☘️', '🍀', '🌾', '🌺', '🌸', '🌼', '🌻', '🍁', '🍂', '🍃', '🐕', '🐈', '🐅', '🦊', '🦝', '🐇', '🦘', '🐁', '🐀', '🐿️', '🦔', '🦇', '🦉', '🦅', '🦆', '🦢', '🦩', '🕊️', '🦜', '🦚', '🦃'];
+    const obstacleEmojis = ['🚗','🚓','🚲','🛴','🛵','🏍️','🚌','🚎','🏎️','🚑','🚒','🚐','🚚','🚛','🚜','🛢️','🚧','🚦','🗼','🌵','🌲','🌳','🌴','☘️','🍀','🌾','🌺','🌸','🌼','🌻','🍁','🍂','🍃','🐕','🐈','🐅','🦊','🦝','🐇','🦘','🐁','🐀','🐿️','🦔','🦇','🦉','🦅','🦆','🦢','🦩','🕊️','🦜','🦚','🦃'];
+    const powerupEmojis = { shield: '🛡️', double: '✨', slow: '🐌' };
 
     function laneToY(lane) {
       return lane * laneHeight + (laneHeight - player.h) / 2;
     }
 
     function drawLanes() {
-      ctx.strokeStyle = '#334155';
+      for (let i = 0; i < laneCount; i++) {
+        ctx.fillStyle = i % 2 === 0 ? '#1e293b' : '#172033';
+        ctx.fillRect(0, i * laneHeight, canvas.width, laneHeight);
+      }
+      ctx.strokeStyle = '#475569';
       ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
       for (let i = 1; i < laneCount; i++) {
         ctx.beginPath();
         ctx.moveTo(0, i * laneHeight);
         ctx.lineTo(canvas.width, i * laneHeight);
         ctx.stroke();
       }
+      ctx.setLineDash([]);
     }
 
     function drawPlayer() {
+      if (powerupActive === 'shield') {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+        ctx.beginPath();
+        ctx.arc(player.x + player.w/2, player.y + player.h/2, player.w, 0, Math.PI*2);
+        ctx.fill();
+      }
       ctx.font = '40px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -111,48 +141,86 @@
       const lane = Math.floor(Math.random() * laneCount);
       const emoji = obstacleEmojis[Math.floor(Math.random() * obstacleEmojis.length)];
       const size = 30;
-      obstacles.push({
-        x: -size,
-        y: laneToY(lane) + (laneHeight - size) / 2,
-        w: size,
-        h: size,
-        emoji: emoji
-      });
+      obstacles.push({ x: -size, y: laneToY(lane) + (laneHeight - size) / 2, w: size, h: size, emoji });
+    }
+
+    function createPowerup() {
+      const lane = Math.floor(Math.random() * laneCount);
+      const types = ['shield','double','slow'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      const size = 30;
+      powerups.push({ x: -size, y: laneToY(lane) + (laneHeight - size) / 2, w: size, h: size, type, emoji: powerupEmojis[type] });
     }
 
     function update() {
       if (gameOver) return;
 
-      // Move obstacles
       for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].x += speed;
         if (obstacles[i].x > canvas.width) {
           obstacles.splice(i, 1);
-          score += 1;
+          score += (powerupActive === 'double' ? 2 : 1);
           ptsSpan.textContent = score;
           playBeep();
         }
       }
 
-      // Spawn
-      spawnTimer++;
-      if (spawnTimer >= spawnInterval) {
-        createObstacle();
-        spawnTimer = 0;
-        if (score % 10 === 0 && speed < 8) speed += 0.2;
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        powerups[i].x += speed;
+        if (powerups[i].x > canvas.width) powerups.splice(i, 1);
       }
 
-      // Collision check
+      spawnTimer++;
+      const currentSpawnInterval = Math.max(30, spawnInterval - Math.floor(score/10)*5);
+      if (spawnTimer >= currentSpawnInterval) {
+        if (Math.random() < 0.7) createObstacle();
+        else if (Math.random() < 0.5) createPowerup();
+        spawnTimer = 0;
+      }
+
+      const newLevel = Math.floor(score / 10) + 1;
+      if (newLevel > level && level < 50) {
+        level = newLevel;
+        lvlSpan.textContent = level;
+        speed = Math.min(8, 2.5 + (level - 1) * 0.2);
+      }
+
+      // colisiones obstáculos
       for (let obs of obstacles) {
-        if (
-          player.x < obs.x + obs.w &&
-          player.x + player.w > obs.x &&
-          player.y < obs.y + obs.h &&
-          player.y + player.h > obs.y
-        ) {
+        if (player.x < obs.x + obs.w && player.x + player.w > obs.x && player.y < obs.y + obs.h && player.y + player.h > obs.y) {
+          if (powerupActive === 'shield') {
+            powerupActive = null;
+            powerupBar.textContent = '';
+            playCrash();
+            obstacles.splice(obstacles.indexOf(obs), 1);
+            continue;
+          }
           playCrash();
           gameOver = true;
           break;
+        }
+      }
+
+      // colisiones power-ups
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        const pu = powerups[i];
+        if (player.x < pu.x + pu.w && player.x + player.w > pu.x && player.y < pu.y + pu.h && player.y + player.h > pu.y) {
+          powerupActive = pu.type;
+          powerupTimer = powerupDuration;
+          const texts = { shield: '🛡️ Escudo activo', double: '✨ Puntos doble', slow: '🐌 Lentitud' };
+          powerupBar.textContent = texts[pu.type];
+          playPowerup();
+          powerups.splice(i, 1);
+          break;
+        }
+      }
+
+      // Timer power-up
+      if (powerupActive) {
+        powerupTimer--;
+        if (powerupTimer <= 0) {
+          powerupActive = null;
+          powerupBar.textContent = '';
         }
       }
     }
@@ -161,9 +229,14 @@
       ctx.font = '30px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      for (let obs of obstacles) {
-        ctx.fillText(obs.emoji, obs.x + obs.w/2, obs.y + obs.h/2);
-      }
+      for (let obs of obstacles) ctx.fillText(obs.emoji, obs.x + obs.w/2, obs.y + obs.h/2);
+    }
+
+    function drawPowerups() {
+      ctx.font = '30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let pu of powerups) ctx.fillText(pu.emoji, pu.x + pu.w/2, pu.y + pu.h/2);
     }
 
     function loop() {
@@ -180,39 +253,29 @@
       } else {
         update();
         drawObstacles();
+        drawPowerups();
         drawPlayer();
         requestAnimationFrame(loop);
       }
     }
 
-    // Keyboard: up/down arrows
+    // Keyboard & Touch controls
     document.addEventListener('keydown', e => {
       if (gameOver) return;
-      if (e.key === 'ArrowUp' || e.key === 'w') {
-        if (player.lane > 0) player.lane--;
-      }
-      if (e.key === 'ArrowDown' || e.key === 's') {
-        if (player.lane < laneCount - 1) player.lane++;
-      }
+      if (e.key === 'ArrowUp' || e.key === 'w') { if (player.lane > 0) player.lane--; }
+      if (e.key === 'ArrowDown' || e.key === 's') { if (player.lane < laneCount - 1) player.lane++; }
       player.y = laneToY(player.lane);
     });
 
-    // Touch: vertical swipe
     let touchStartY = 0;
-    canvas.addEventListener('touchstart', e => {
-      touchStartY = e.touches[0].clientY;
-      e.preventDefault();
-    });
+    canvas.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; e.preventDefault(); });
     canvas.addEventListener('touchmove', e => e.preventDefault());
     canvas.addEventListener('touchend', e => {
       if (gameOver) return;
       const dy = e.changedTouches[0].clientY - touchStartY;
       if (Math.abs(dy) > 30) {
-        if (dy < 0 && player.lane > 0) {
-          player.lane--; // swipe up -> move up (lane 0 es el superior)
-        } else if (dy > 0 && player.lane < laneCount - 1) {
-          player.lane++; // swipe down -> move down
-        }
+        if (dy < 0 && player.lane > 0) player.lane--;
+        else if (dy > 0 && player.lane < laneCount - 1) player.lane++;
       }
       player.y = laneToY(player.lane);
       e.preventDefault();
@@ -222,15 +285,19 @@
       player.lane = 2;
       player.y = laneToY(player.lane);
       obstacles = [];
+      powerups = [];
       score = 0;
+      level = 1;
       speed = 2.5;
       spawnTimer = 0;
       gameOver = false;
+      powerupActive = null;
+      powerupBar.textContent = '';
       ptsSpan.textContent = score;
+      lvlSpan.textContent = level;
       loop();
     });
 
-    // init
     player.y = laneToY(player.lane);
     loop();
   </script>
