@@ -13,17 +13,24 @@
     #controls { margin-top: 1rem; display: flex; gap: 1rem; }
     button { background: #f59e0b; color: #0f172a; border: none; padding: 0.75rem 1.5rem; border-radius: 0.25rem; font-weight: bold; cursor: pointer; }
     button:active { background: #d97706; }
+    #instructions { font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem; text-align: center; }
   </style>
 </head>
 <body>
   <h1>🚕 Radio Taxi Full Express</h1>
   <div id="score">Puntos: <span id="pts">0</span></div>
-  <canvas id="game" width="300" height="500"></canvas>
+  <canvas id="game" width="500" height="300"></canvas>
+  <div id="instructions">Usa ↑/↓ o desliza verticalmente para cambiar de pista</div>
   <div id="controls">
     <button id="restart">Reiniciar</button>
   </div>
   <script>
-    // Web Audio API context
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const ptsSpan = document.getElementById('pts');
+    const restartBtn = document.getElementById('restart');
+
+    // Web Audio API context for sounds
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
 
@@ -42,12 +49,10 @@
 
     function playCrash() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const bufferSize = audioCtx.sampleRate * 0.3; // 0.3 s
+      const bufferSize = audioCtx.sampleRate * 0.3;
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
       const source = audioCtx.createBufferSource();
       const gain = audioCtx.createGain();
       source.buffer = buffer;
@@ -58,22 +63,42 @@
       source.start();
     }
 
-    // ... resto del código del juego ...
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const ptsSpan = document.getElementById('pts');
-    const restartBtn = document.getElementById('restart');
+    // Game constants
+    const laneCount = 5;
+    const laneHeight = canvas.height / laneCount;
+    const player = {
+      lane: 2,            // 0-4 (center initially)
+      x: canvas.width - 60, // fixed x near right edge
+      y: 0,               // will be computed from lane
+      w: 40,
+      h: 50
+    };
+    player.y = laneToY(player.lane);
 
-    // Emojis para obstáculos
-    const obstacleEmojis = ['🚗', '🚓', '🚲', '🛴', '🛵', '🏍️', '🚌', '🚎', '🏎️', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🏍️', '🛵', '🚲', '🛴', '🛢️', '🚧', '🚦', '🚧', '🗼', '🌵', '🌲', '🌳', '🌴', '☘️', '🍀', '🌾', '🌺', '🌸', '🌼', '🌻', '🌺', '🍁', '🍂', '🍃', '🐕', '🐈', '🐅', '🦊', '🦝', '🐇', '🦘', '🐁', '🐀', '🐿️', '🦔', '🦇', '🦉', '🦅', '🦆', '🦢', '🦩', '🕊️', '🦆', '🦜', '🦚', '🦃', '🦚', '🦩'];
-
-    const player = { x: canvas.width/2 - 20, y: canvas.height - 50, w: 40, h: 50, speed: 6 };
     let obstacles = [];
     let score = 0;
     let gameOver = false;
-    let speed = 3;
+    let speed = 2.5; // pixels per frame
     let spawnTimer = 0;
-    const spawnInterval = 60;
+    const spawnInterval = 60; // frames
+
+    // Emojis para obstáculos
+    const obstacleEmojis = ['🚗', '🚓', '🚲', '🛴', '🛵', '🏍️', '🚌', '🚎', '🏎️', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🛢️', '🚧', '🚦', '🗼', '🌵', '🌲', '🌳', '🌴', '☘️', '🍀', '🌾', '🌺', '🌸', '🌼', '🌻', '🍁', '🍂', '🍃', '🐕', '🐈', '🐅', '🦊', '🦝', '🐇', '🦘', '🐁', '🐀', '🐿️', '🦔', '🦇', '🦉', '🦅', '🦆', '🦢', '🦩', '🕊️', '🦜', '🦚', '🦃'];
+
+    function laneToY(lane) {
+      return lane * laneHeight + (laneHeight - player.h) / 2;
+    }
+
+    function drawLanes() {
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < laneCount; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * laneHeight);
+        ctx.lineTo(canvas.width, i * laneHeight);
+        ctx.stroke();
+      }
+    }
 
     function drawPlayer() {
       ctx.font = '40px sans-serif';
@@ -83,20 +108,25 @@
     }
 
     function createObstacle() {
+      const lane = Math.floor(Math.random() * laneCount);
       const emoji = obstacleEmojis[Math.floor(Math.random() * obstacleEmojis.length)];
-      const size = 30 + Math.random() * 20;
-      const w = size;
-      const h = size;
-      const x = Math.random() * (canvas.width - w);
-      obstacles.push({ x, y: -h, w, h, emoji });
+      const size = 30;
+      obstacles.push({
+        x: -size,
+        y: laneToY(lane) + (laneHeight - size) / 2,
+        w: size,
+        h: size,
+        emoji: emoji
+      });
     }
 
     function update() {
       if (gameOver) return;
 
+      // Move obstacles
       for (let i = obstacles.length - 1; i >= 0; i--) {
-        obstacles[i].y += speed;
-        if (obstacles[i].y > canvas.height) {
+        obstacles[i].x += speed;
+        if (obstacles[i].x > canvas.width) {
           obstacles.splice(i, 1);
           score += 1;
           ptsSpan.textContent = score;
@@ -104,6 +134,7 @@
         }
       }
 
+      // Spawn
       spawnTimer++;
       if (spawnTimer >= spawnInterval) {
         createObstacle();
@@ -111,6 +142,7 @@
         if (score % 10 === 0 && speed < 8) speed += 0.2;
       }
 
+      // Collision check
       for (let obs of obstacles) {
         if (
           player.x < obs.x + obs.w &&
@@ -136,6 +168,7 @@
 
     function loop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawLanes();
       if (gameOver) {
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -152,49 +185,53 @@
       }
     }
 
-    // keyboard controls
+    // Keyboard: up/down arrows
     document.addEventListener('keydown', e => {
       if (gameOver) return;
-      if (e.key === 'ArrowLeft' || e.key === 'a') player.x -= player.speed;
-      if (e.key === 'ArrowRight' || e.key === 'd') player.x += player.speed;
-      // keep in canvas
-      if (player.x < 0) player.x = 0;
-      if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+      if (e.key === 'ArrowUp' || e.key === 'w') {
+        if (player.lane > 0) player.lane--;
+      }
+      if (e.key === 'ArrowDown' || e.key === 's') {
+        if (player.lane < laneCount - 1) player.lane++;
+      }
+      player.y = laneToY(player.lane);
     });
 
-    // touch controls: swipe left/right
-    let touchStartX = 0;
+    // Touch: vertical swipe
+    let touchStartY = 0;
     canvas.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
       e.preventDefault();
     });
     canvas.addEventListener('touchmove', e => e.preventDefault());
     canvas.addEventListener('touchend', e => {
       if (gameOver) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 10) {
-        if (dx > 0) player.x += 40; // swipe right
-        else player.x -= 40; // swipe left
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dy) > 30) {
+        if (dy < 0 && player.lane < laneCount - 1) {
+          player.lane++; // swipe up -> move down lane (because lane 0 at top)
+        } else if (dy > 0 && player.lane > 0) {
+          player.lane--; // swipe down -> move up lane
+        }
       }
-      // keep in canvas
-      if (player.x < 0) player.x = 0;
-      if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+      player.y = laneToY(player.lane);
       e.preventDefault();
     });
 
     restartBtn.addEventListener('click', () => {
-      player.x = canvas.width/2 - player.w/2;
+      player.lane = 2;
+      player.y = laneToY(player.lane);
       obstacles = [];
       score = 0;
-      speed = 3;
+      speed = 2.5;
       spawnTimer = 0;
       gameOver = false;
       ptsSpan.textContent = score;
       loop();
     });
 
-    // initial
-    player.x = canvas.width/2 - player.w/2;
+    // init
+    player.y = laneToY(player.lane);
     loop();
   </script>
 </body>
