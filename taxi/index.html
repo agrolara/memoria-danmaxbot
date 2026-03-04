@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Radio Taxi Full Express</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    #score { margin-bottom: 0.5rem; font-size: 1.2rem; }
+    canvas { background: #1e293b; border: 2px solid #f59e0b; touch-action: none; }
+    #controls { margin-top: 1rem; display: flex; gap: 1rem; }
+    button { background: #f59e0b; color: #0f172a; border: none; padding: 0.75rem 1.5rem; border-radius: 0.25rem; font-weight: bold; cursor: pointer; }
+    button:active { background: #d97706; }
+  </style>
+</head>
+<body>
+  <h1>🚕 Radio Taxi Full Express</h1>
+  <div id="score">Puntos: <span id="pts">0</span></div>
+  <canvas id="game" width="300" height="500"></canvas>
+  <div id="controls">
+    <button id="restart">Reiniciar</button>
+  </div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const ptsSpan = document.getElementById('pts');
+    const restartBtn = document.getElementById('restart');
+
+    const player = { x: canvas.width/2 - 15, y: canvas.height - 40, w: 30, h: 40, speed: 6 };
+    let obstacles = [];
+    let score = 0;
+    let gameOver = false;
+    let speed = 3; // pixels per frame
+    let spawnTimer = 0;
+    const spawnInterval = 60; // frames
+
+    function drawPlayer() {
+      ctx.fillStyle = '#f59e0b';
+      // simple triangle pointing up
+      ctx.beginPath();
+      ctx.moveTo(player.x + player.w/2, player.y);
+      ctx.lineTo(player.x + player.w, player.y + player.h);
+      ctx.lineTo(player.x, player.y + player.h);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function createObstacle() {
+      const w = 30 + Math.random() * 30;
+      const h = 20 + Math.random() * 20;
+      const x = Math.random() * (canvas.width - w);
+      obstacles.push({ x, y: -h, w, h });
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      // move obstacles down
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        obstacles[i].y += speed;
+        if (obstacles[i].y > canvas.height) {
+          obstacles.splice(i, 1);
+          score += 1;
+          ptsSpan.textContent = score;
+        }
+      }
+
+      // spawn new obstacles
+      spawnTimer++;
+      if (spawnTimer >= spawnInterval) {
+        createObstacle();
+        spawnTimer = 0;
+        // increase speed slowly
+        if (score % 10 === 0 && speed < 8) speed += 0.2;
+      }
+
+      // check collisions
+      for (let obs of obstacles) {
+        if (
+          player.x < obs.x + obs.w &&
+          player.x + player.w > obs.x &&
+          player.y < obs.y + obs.h &&
+          player.y + player.h > obs.y
+        ) {
+          gameOver = true;
+          break;
+        }
+      }
+    }
+
+    function drawObstacles() {
+      ctx.fillStyle = '#ef4444';
+      for (let obs of obstacles) {
+        ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+      }
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over', canvas.width/2, canvas.height/2);
+        ctx.fillText('Puntuación: '+score, canvas.width/2, canvas.height/2+20);
+      } else {
+        update();
+        drawObstacles();
+        drawPlayer();
+        requestAnimationFrame(loop);
+      }
+    }
+
+    // keyboard controls
+    document.addEventListener('keydown', e => {
+      if (gameOver) return;
+      if (e.key === 'ArrowLeft' || e.key === 'a') player.x -= player.speed;
+      if (e.key === 'ArrowRight' || e.key === 'd') player.x += player.speed;
+      // keep in canvas
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+    });
+
+    // touch controls: swipe left/right
+    let touchStartX = 0;
+    canvas.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      e.preventDefault();
+    });
+    canvas.addEventListener('touchmove', e => e.preventDefault());
+    canvas.addEventListener('touchend', e => {
+      if (gameOver) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 10) {
+        if (dx > 0) player.x += 50; // swipe right
+        else player.x -= 50; // swipe left
+      }
+      // keep in canvas
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+      e.preventDefault();
+    });
+
+    restartBtn.addEventListener('click', () => {
+      player.x = canvas.width/2 - player.w/2;
+      obstacles = [];
+      score = 0;
+      speed = 3;
+      spawnTimer = 0;
+      gameOver = false;
+      ptsSpan.textContent = score;
+      loop();
+    });
+
+    // initial
+    player.x = canvas.width/2 - player.w/2;
+    loop();
+  </script>
+</body>
+</html>
