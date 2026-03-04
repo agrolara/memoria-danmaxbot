@@ -23,6 +23,42 @@
     <button id="restart">Reiniciar</button>
   </div>
   <script>
+    // Web Audio API context
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function playBeep() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function playCrash() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const bufferSize = audioCtx.sampleRate * 0.3; // 0.3 s
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const source = audioCtx.createBufferSource();
+      const gain = audioCtx.createGain();
+      source.buffer = buffer;
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      source.connect(gain);
+      gain.connect(audioCtx.destination);
+      source.start();
+    }
+
+    // ... resto del código del juego ...
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     const ptsSpan = document.getElementById('pts');
@@ -64,6 +100,7 @@
           obstacles.splice(i, 1);
           score += 1;
           ptsSpan.textContent = score;
+          playBeep();
         }
       }
 
@@ -81,6 +118,7 @@
           player.y < obs.y + obs.h &&
           player.y + player.h > obs.y
         ) {
+          playCrash();
           gameOver = true;
           break;
         }
