@@ -28,36 +28,36 @@
     const ptsSpan = document.getElementById('pts');
     const restartBtn = document.getElementById('restart');
 
-    const player = { x: canvas.width/2 - 15, y: canvas.height - 40, w: 30, h: 40, speed: 6 };
+    // Emojis para obstáculos
+    const obstacleEmojis = ['🚗', '🚓', '🚲', '🛴', '🛵', '🏍️', '🚌', '🚎', '🏎️', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🏍️', '🛵', '🚲', '🛴', '🛢️', '🚧', '🚦', '🚧', '🗼', '🌵', '🌲', '🌳', '🌴', '☘️', '🍀', '🌾', '🌺', '🌸', '🌼', '🌻', '🌺', '🍁', '🍂', '🍃', '🐕', '🐈', '🐅', '🦊', '🦝', '🐇', '🦘', '🐁', '🐀', '🐿️', '🦔', '🦇', '🦉', '🦅', '🦆', '🦢', '🦩', '🕊️', '🦆', '🦜', '🦚', '🦃', '🦚', '🦩'];
+
+    const player = { x: canvas.width/2 - 20, y: canvas.height - 50, w: 40, h: 50, speed: 6 };
     let obstacles = [];
     let score = 0;
     let gameOver = false;
-    let speed = 3; // pixels per frame
+    let speed = 3;
     let spawnTimer = 0;
-    const spawnInterval = 60; // frames
+    const spawnInterval = 60;
 
     function drawPlayer() {
-      ctx.fillStyle = '#f59e0b';
-      // simple triangle pointing up
-      ctx.beginPath();
-      ctx.moveTo(player.x + player.w/2, player.y);
-      ctx.lineTo(player.x + player.w, player.y + player.h);
-      ctx.lineTo(player.x, player.y + player.h);
-      ctx.closePath();
-      ctx.fill();
+      ctx.font = '40px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🚕', player.x + player.w/2, player.y + player.h/2);
     }
 
     function createObstacle() {
-      const w = 30 + Math.random() * 30;
-      const h = 20 + Math.random() * 20;
+      const emoji = obstacleEmojis[Math.floor(Math.random() * obstacleEmojis.length)];
+      const size = 30 + Math.random() * 20;
+      const w = size;
+      const h = size;
       const x = Math.random() * (canvas.width - w);
-      obstacles.push({ x, y: -h, w, h });
+      obstacles.push({ x, y: -h, w, h, emoji });
     }
 
     function update() {
       if (gameOver) return;
 
-      // move obstacles down
       for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].y += speed;
         if (obstacles[i].y > canvas.height) {
@@ -67,16 +67,13 @@
         }
       }
 
-      // spawn new obstacles
       spawnTimer++;
       if (spawnTimer >= spawnInterval) {
         createObstacle();
         spawnTimer = 0;
-        // increase speed slowly
         if (score % 10 === 0 && speed < 8) speed += 0.2;
       }
 
-      // check collisions
       for (let obs of obstacles) {
         if (
           player.x < obs.x + obs.w &&
@@ -91,9 +88,11 @@
     }
 
     function drawObstacles() {
-      ctx.fillStyle = '#ef4444';
+      ctx.font = '30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       for (let obs of obstacles) {
-        ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+        ctx.fillText(obs.emoji, obs.x + obs.w/2, obs.y + obs.h/2);
       }
     }
 
@@ -136,8 +135,8 @@
       if (gameOver) return;
       const dx = e.changedTouches[0].clientX - touchStartX;
       if (Math.abs(dx) > 10) {
-        if (dx > 0) player.x += 50; // swipe right
-        else player.x -= 50; // swipe left
+        if (dx > 0) player.x += 40; // swipe right
+        else player.x -= 40; // swipe left
       }
       // keep in canvas
       if (player.x < 0) player.x = 0;
