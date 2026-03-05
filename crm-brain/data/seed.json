@@ -1,0 +1,70 @@
+{
+  "contacts": [
+    {
+      "id": "contact_1",
+      "name": "Mauricio Díaz",
+      "email": "agrolara00@gmail.com",
+      "phone": "+56 9 1234 5678",
+      "company": "Agrolara",
+      "tags": ["cliente", "amigo"],
+      "notes": "Interesado en automatizaciones. Usa [[Pluribus]] como serie favorita."
+    },
+    {
+      "id": "contact_2",
+      "name": "Carlos Riquelme",
+      "email": "criquelme@mhn.cl",
+      "phone": "+56 9 8765 4321",
+      "company": "Museo de Historia Natural",
+      "tags": ["colega", "mentor"],
+      "notes": "Paleontólogo. Colabora en proyecto de libro. Ver [[El Viaje en el Tiempo de los Lara]]."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task_1",
+      "title": "Revisar correos pendientes",
+      "done": false,
+      "due": "2026-03-05",
+      "contactId": null
+    },
+    {
+      "id": "task_2",
+      "title": "Llamar a Carlos Riquelme",
+      "done": false,
+      "due": "2026-03-06",
+      "contactId": "contact_2"
+    }
+  ],
+  "notes": [
+    {
+      "id": "note_1",
+      "title": "Pluribus",
+      "content": "Serie de Apple TV+ creada por Vince Gilligan. Post-apocalíptica, mente colmena.\n\nProtagonista: Carol Sturka (Rhea Seehorn).\n\nTemática: IA, libre albedrío, felicidad vs individualidad.\n\nRelacionada: [[El Viaje en el Tiempo de los Lara]] (similar conflicto: máquina del tiempo vs libre albedrío).",
+      "date": "2026-03-04T12:00:00.000Z"
+    },
+    {
+      "id": "note_2",
+      "title": "El Viaje en el Tiempo de los Lara",
+      "content": "Libro en progreso sobre familia chilena que viaja al Cretácico.\n\nPersonajes: Mauricio, Dante, Máximo, Abuela Raquel, Tata Héctor.\n\nTemas: ética temporal, dinosaurios chilenos (Stegouros, Megaraptor).\n\nVer también: [[Proyecto Libro Checklist]] y [[Kali Linux]] (herramientas futuras).",
+      "date": "2026-03-04T12:00:00.000Z"
+    },
+    {
+      "id": "note_3",
+      "title": "Proyecto Libro Checklist",
+      "content": "- [x] Capítulo 1 completado\n- [x] Capítulo 2 completado\n- [ ] Capítulo 3 en progreso\n- [ ] Revisión editorial\n- [ ] Diseño de portada\n\nNecesita: feedback de [[Carlos Riquelme]] (experto paleontología).",
+      "date": "2026-03-04T12:00:00.000Z"
+    },
+    {
+      "id": "note_4",
+      "title": "Kali Linux",
+      "content": "Herramientas de auditoría de seguridad planificadas:\n- nmap\n- metasploit-framework\n- sqlmap\n- john\n- wireshark\n\n⚠️ Solo para sistemas autorizados.\n\nRelacionado: [[Backup OpenClaw]] (seguridad del sistema).",
+      "date": "2026-03-04T12:00:00.000Z"
+    },
+    {
+      "id": "note_5",
+      "title": "Backup OpenClaw",
+      "content": "Sistema de backup diario automático:\n- Script: backup_openclaw_daily.sh\n- Hora: 12:00 UTC\n- Entrega: Telegram\n- Retención: manual\n\nRestauración: restore_openclaw.sh\n\nVer: [[Kali Linux]] (seguridad del sistema).",
+      "date": "2026-03-04T12:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM + 2do Cerebro</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">🧠 CRM+2do</div>
+      <nav class="nav-tabs">
+        <button class="tab active" data-tab="crm">📇 CRM</button>
+        <button class="tab" data-tab="brain">🧠 2do Cerebro</button>
+        <button class="tab" data-tab="graph">🕸️ Grafos</button>
+      </nav>
+      <div class="search-box">
+        <input type="text" id="global-search" placeholder="🔍 Buscar...">
+      </div>
+      <div class="quick-links">
+        <h4>Backlinks activos</h4>
+        <ul id="backlink-list"></ul>
+      </div>
+      <div class="repo-link">
+        <a href="https://github.com/Agrolara/crm-brain" target="_blank" rel="noopener">
+          🐙 Ver en GitHub
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- CRM Tab -->
+      <section id="crm-tab" class="tab-content active">
+        <header class="section-header">
+          <h2>Contactos y Tareas</h2>
+          <button class="btn primary" id="add-contact-btn">+ Nuevo Contacto</button>
+        </header>
+        <div class="crm-grid">
+          <!-- Contact List -->
+          <div class="panel contacts-panel">
+            <h3>Contactos</h3>
+            <ul id="contact-list" class="item-list"></ul>
+          </div>
+          <!-- Task Panel -->
+          <div class="panel tasks-panel">
+            <h3>Tareas Pendientes</h3>
+            <ul id="task-list" class="item-list"></ul>
+          </div>
+          <!-- Contact Detail -->
+          <div class="panel detail-panel" id="contact-detail">
+            <div class="empty-state">Selecciona un contacto para ver detalles</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2do Cerebro Tab -->
+      <section id="brain-tab" class="tab-content">
+        <header class="section-header">
+          <h2>2do Cerebro</h2>
+          <div class="brain-actions">
+            <button class="btn" id="new-note-btn">📝 Nueva Nota</button>
+            <button class="btn" id="toggle-graph-btn">🕸️ Mostrar/Ocultar Grafos</button>
+          </div>
+        </header>
+        <div class="brain-workspace">
+          <div class="note-list-panel">
+            <h3>Notas</h3>
+            <ul id="note-list" class="item-list notes-list"></ul>
+          </div>
+          <div class="editor-panel">
+            <div class="editor-toolbar">
+              <button class="toolbar-btn" data-command="bold"><b>B</b></button>
+              <button class="toolbar-btn" data-command="italic"><i>I</i></button>
+              <button class="toolbar-btn" data-command="heading">H</button>
+              <button class="toolbar-btn" data-command="link">🔗</button>
+              <button class="toolbar-btn" data-command="code">&lt;/&gt;</button>
+            </div>
+            <textarea id="note-editor" placeholder="Escribe tu nota... Usa [[nombre-nota]] para crear backlinks."></textarea>
+            <div class="editor-footer">
+              <span class="word-count">0 palabras</span>
+              <button class="btn primary" id="save-note-btn">💾 Guardar</button>
+            </div>
+          </div>
+          <div class="preview-panel">
+            <h3>Vista Previa</h3>
+            <div id="note-preview" class="markdown-preview"></div>
+            <div id="backlinks-section" class="backlinks-section">
+              <h4>Backlinks encontrados:</h4>
+              <ul id="preview-backlinks"></ul>
+            </div>
+          </div>
+        </div>
+        <!-- Canvas para grafos -->
+        <canvas id="graph-canvas" class="graph-canvas hidden"></canvas>
+      </section>
+
+      <!-- Grafos Tab -->
+      <section id="graph-tab" class="tab-content">
+        <header class="section-header">
+          <h2>🌐 Grafos de Conocimiento</h2>
+          <div class="graph-controls">
+            <button class="btn" id="regenerate-graph">🔄 Regenerar</button>
+            <button class="btn" id="export-graph">📤 Exportar</button>
+          </div>
+        </header>
+        <div class="graph-container">
+          <canvas id="main-graph-canvas"></canvas>
+          <div class="graph-legend">
+            <div class="legend-item"><span class="dot" style="background:#4CAF50"></span> Nota existente</div>
+            <div class="legend-item"><span class="dot" style="background:#f44336"></span> Nota faltante (broken)</div>
+            <div class="legend-item"><span class="dot" style="background:#2196F3"></span> Contacto/CRM</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modales -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="contact-modal" class="modal">
+      <h3>Nuevo Contacto</h3>
+      <form id="contact-form">
+        <input type="text" name="name" placeholder="Nombre" required>
+        <input type="email" name="email" placeholder="Email">
+        <input type="tel" name="phone" placeholder="Teléfono">
+        <input type="text" name="company" placeholder="Empresa">
+        <select name="tags" multiple>
+          <option value="cliente">Cliente</option>
+          <option value="proveedor">Proveedor</option>
+          <option value="colega">Colega</option>
+        </select>
+        <textarea name="notes" placeholder="Notas (usa [[nota]] para backlinks)"></textarea>
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Guardar</button>
+          <button type="button" class="btn cancel" id="close-modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Templates -->
+  <template id="contact-item-template">
+    <li class="contact-item" data-id="">
+      <span class="item-name"></span>
+      <span class="item-company"></span>
+      <span class="item-tags"></span>
+    </li>
+  </template>
+
+  <template id="task-item-template">
+    <li class="task-item" data-id="">
+      <input type="checkbox" class="task-check">
+      <span class="task-text"></span>
+      <span class="task-due"></span>
+    </li>
+  </template>
+
+  <template id="note-item-template">
+    <li class="note-item" data-id="">
+      <span class="note-title"></span>
+      <span class="note-date"></span>
+    </li>
+  </template>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
