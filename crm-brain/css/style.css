@@ -1,20 +1,20 @@
-/* Fuentes Retro Pixel */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Pixelify+Sans&display=swap');
+/* Fuentes: Sistema normal (sin pixel) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg-dark: #0d1117;
-  --bg-panel: #161b22;
-  --bg-input: #21262d;
-  --border: #30363d;
-  --text-main: #c9d1d9;
-  --text-muted: #8b949e;
-  --accent-green: #3fb950;
-  --accent-blue: #58a6ff;
-  --accent-red: #f85149;
-  --accent-yellow: #d29922;
-  --accent-purple: #a371f7;
-  --accent-orange: #f0883e;
-  --accent-cyan: #39c5cf;
+  --bg-dark: #0f172a;
+  --bg-panel: #1e293b;
+  --bg-input: #334155;
+  --border: #475569;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent-green: #10b981;
+  --accent-blue: #3b82f6;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --accent-orange: #f97316;
+  --accent-cyan: #06b6d4;
 }
 
 * {
@@ -24,10 +24,13 @@
 }
 
 body {
-  font-family: 'VT323', 'Courier New', monospace;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-main);
   overflow: hidden;
+  font-size: 16px;
+  line-height: 1.5;
+}
   font-size: 16px;
 }
 
@@ -67,12 +70,12 @@ body {
 }
 
 .logo {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
   color: var(--accent-cyan);
   text-align: center;
   margin-bottom: 8px;
-  text-shadow: 2px 2px 0 var(--accent-purple);
 }
 
 .nav-tabs {
@@ -86,11 +89,12 @@ body {
   border: 2px solid var(--border);
   color: var(--text-main);
   padding: 10px 12px;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.1s;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .tab:hover {
@@ -111,8 +115,8 @@ body {
   background: var(--bg-input);
   border: 2px solid var(--border);
   color: var(--text-main);
-  font-family: 'VT323', monospace;
-  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
 }
 
 .search-box input:focus {
@@ -147,10 +151,10 @@ body {
 }
 
 .section-header h2 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
   color: var(--accent-yellow);
-  text-shadow: 1px 1px 0 var(--bg-dark);
 }
 
 /* Buttons */
@@ -159,11 +163,12 @@ body {
   border: 2px solid var(--border);
   color: var(--text-main);
   padding: 8px 12px;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.1s;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .btn:hover {
@@ -199,8 +204,9 @@ body {
 }
 
 .panel h3 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
   color: var(--accent-blue);
   margin-bottom: 12px;
   padding-bottom: 8px;
@@ -221,8 +227,8 @@ body {
   padding: 8px;
   cursor: pointer;
   transition: all 0.1s;
-  font-family: 'VT323', monospace;
-  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
 }
 
 .contact-item:hover, .task-item:hover, .note-item:hover {
@@ -295,13 +301,14 @@ body {
 }
 
 .contact-detail {
-  font-family: 'VT323', monospace;
-  font-size: 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
 }
 
 .contact-detail h3 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
   color: var(--accent-yellow);
   margin-bottom: 12px;
 }
@@ -381,8 +388,9 @@ body {
   color: var(--text-main);
   width: 32px;
   height: 32px;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -396,9 +404,9 @@ body {
   border: none;
   color: var(--text-main);
   padding: 16px;
-  font-family: 'VT323', monospace;
-  font-size: 20px;
-  line-height: 1.5;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 16px;
+  line-height: 1.6;
   resize: none;
 }
 
@@ -429,22 +437,24 @@ body {
 }
 
 .preview-panel h3 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
   color: var(--accent-blue);
   margin-bottom: 12px;
 }
 
 .markdown-preview {
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  line-height: 1.6;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--text-main);
 }
 
 .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
   margin: 16px 0 8px;
   color: var(--accent-yellow);
 }
@@ -507,8 +517,9 @@ body {
 }
 
 .backlinks-section h4 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
   color: var(--accent-yellow);
   margin-top: 16px;
 }
@@ -582,8 +593,9 @@ body {
 }
 
 .modal h3 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
   color: var(--accent-yellow);
   margin-bottom: 16px;
 }
@@ -599,8 +611,8 @@ body {
   border: 1px solid var(--border);
   color: var(--text-main);
   padding: 8px;
-  font-family: 'VT323', monospace;
-  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
 }
 
 .modal input:focus, .modal select:focus, .modal textarea:focus {
@@ -622,8 +634,9 @@ body {
 
 /* Quick links backlinks */
 .quick-links h4 {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 9px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
   color: var(--accent-orange);
   margin-bottom: 8px;
 }
@@ -661,8 +674,9 @@ body {
   border: 2px solid var(--border);
   color: var(--text-main);
   text-align: center;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
   text-decoration: none;
   transition: all 0.1s;
 }
